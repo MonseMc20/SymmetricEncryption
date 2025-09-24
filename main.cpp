@@ -70,6 +70,52 @@ std::string transposition(std::string key, std::string cipher){
     return transposedCipher;   
 }
 
+std::string decryptCipher(std::string temporaryKey, std::unordered_map<char,int> charToIndex, std::string cipher, char characters[47]) {
+    std::string plaintext;
+
+    for (int i = 0; i < cipher.length(); i++) {
+
+        int cipherVal = charToIndex[cipher[i]];
+        int keyVal = charToIndex[temporaryKey[i]];
+
+        int diff = cipherVal - keyVal;
+
+        if (diff < 0) {
+            diff += 47;  
+        }
+
+        plaintext.push_back(characters[diff]);
+    }
+
+    std::cout << "Cipher-PlainText: " << plaintext << std::endl;
+    return plaintext;
+}
+
+std::string inverseTransposition(std::string key, std::string transposedCipher){
+    std::string cipher;
+    int keyLength = key.length();
+    int rows = (transposedCipher.length() + keyLength - 1) / keyLength; 
+
+    std::vector<std::vector<char>> cipherText(rows, std::vector<char>(keyLength, '_')); 
+
+    int idx = 0;
+    for (int r = 0; r < rows && idx < transposedCipher.length(); r++) {
+        for (int c = 0; c < keyLength && idx < transposedCipher.length(); c++) {
+            cipherText[r][c] = transposedCipher[idx++];
+        }
+    }
+
+    for (int c = 0; c < keyLength; c++) {
+        for (int r = 0; r < rows; r++) {
+            if (cipherText[r][c] != '_') {
+                cipher.push_back(cipherText[r][c]);
+            }
+        }
+    }
+    std::cout << "Inverse-transposedCipher: " << cipher << std::endl;
+    return cipher;   
+}
+
 int main (){
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -102,6 +148,18 @@ int main (){
 
     std::string cipher = createCipher(key, charToIndex, plaintext, characters);
     transposition(key, cipher);
+
+    std::string cipherToDecypt;
+    std::string keyToDecrypt;
+
+    std::cout << "Write the ciphered text to be decrypted: ";
+    std::cin >> cipherToDecypt;
+
+    std::cout << "Write the key to decrypt the chiper: ";
+    std::cin >> keyToDecrypt;
+
+    std::string cipherDetransposotioned = inverseTransposition(keyToDecrypt, cipherToDecypt);
+    std::string decyptedPlaintext = decryptCipher(keyToDecrypt, charToIndex, cipherDetransposotioned, characters);
 
     return 0;
 }
