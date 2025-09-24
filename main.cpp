@@ -70,6 +70,13 @@ std::string transposition(std::string key, std::string cipher){
     return transposedCipher;   
 }
 
+std::string shiftKey(std::string key) {
+    int len = key.length();
+    int half = len / 2;
+    std::string newKey = key.substr(half) + key.substr(0, half);
+    return newKey;
+}
+
 std::string decryptCipher(std::string temporaryKey, std::unordered_map<char,int> charToIndex, std::string cipher, char characters[47]) {
     std::string plaintext;
 
@@ -147,7 +154,12 @@ int main (){
     }
 
     std::string cipher = createCipher(key, charToIndex, plaintext, characters);
-    transposition(key, cipher);
+    cipher = transposition(key, cipher);
+    key = shiftKey(key);
+    std::cout << "shifted key: " << key << std::endl;
+    cipher = createCipher(key, charToIndex, cipher, characters);
+    cipher = transposition(key, cipher);
+
 
     std::string cipherToDecypt;
     std::string keyToDecrypt;
