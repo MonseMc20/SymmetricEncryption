@@ -173,6 +173,7 @@ int main (){
     std::cout << "shifted key: " << key << std::endl;
     cipher = createCipher(key, charToIndex, cipher, characters);
     cipher = transposition(key, cipher);
+    cipher = transposition(key, cipher);
     cipher = xorCipher(cipher, key);
     std::cout << "Final Cipher: " << cipher << std::endl;
 
