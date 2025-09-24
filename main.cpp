@@ -74,6 +74,7 @@ std::string shiftKey(std::string key) {
     int len = key.length();
     int half = len / 2;
     std::string newKey = key.substr(half) + key.substr(0, half);
+    std::cout << "shifted key: " << newKey << std::endl;
     return newKey;
 }
 
@@ -87,7 +88,7 @@ std::string xorCipher(const std::string &plaintext, const std::string &key) {
         char c = p ^ k;               
         cipher.push_back(c);
     }
-
+    std::cout << "xor: " << cipher << std::endl;
     return cipher;
 }
 
@@ -100,12 +101,14 @@ std::string decryptCipher(std::string temporaryKey, std::unordered_map<char,int>
         int keyVal = charToIndex[temporaryKey[i]];
 
         int diff = cipherVal - keyVal;
+        if(characters[diff] != '_'){
+            
+            if (diff < 0) {
+                diff += 47;  
+            }
 
-        if (diff < 0) {
-            diff += 47;  
+            plaintext.push_back(characters[diff]);
         }
-
-        plaintext.push_back(characters[diff]);
     }
 
     std::cout << "Cipher-PlainText: " << plaintext << std::endl;
@@ -128,13 +131,21 @@ std::string inverseTransposition(std::string key, std::string transposedCipher){
 
     for (int c = 0; c < keyLength; c++) {
         for (int r = 0; r < rows; r++) {
-            if (cipherText[r][c] != '_') {
+            //if (cipherText[r][c] != '_') {
                 cipher.push_back(cipherText[r][c]);
-            }
+            //}
         }
     }
     std::cout << "Inverse-transposedCipher: " << cipher << std::endl;
     return cipher;   
+}
+
+std::string inverseShiftKey(std::string key) {
+    int len = key.length();
+    int half = len / 2;
+    std::string newKey = key.substr(len - half) + key.substr(0, len - half);
+    std::cout << "shifted key: " << newKey << std::endl;
+    return newKey;
 }
 
 int main (){
@@ -170,24 +181,23 @@ int main (){
     std::string cipher = createCipher(key, charToIndex, plaintext, characters);
     cipher = transposition(key, cipher);
     key = shiftKey(key);
-    std::cout << "shifted key: " << key << std::endl;
-    cipher = createCipher(key, charToIndex, cipher, characters);
     cipher = transposition(key, cipher);
     cipher = transposition(key, cipher);
     cipher = xorCipher(cipher, key);
-    std::cout << "Final Cipher: " << cipher << std::endl;
 
-
-    std::string cipherToDecypt;
     std::string keyToDecrypt;
 
-    std::cout << "Write the ciphered text to be decrypted: ";
-    std::cin >> cipherToDecypt;
+    std::cout << "ciphered text to be decrypted: " << cipher << "\n";
 
     std::cout << "Write the key to decrypt the chiper: ";
     std::cin >> keyToDecrypt;
 
-    std::string cipherDetransposotioned = inverseTransposition(keyToDecrypt, cipherToDecypt);
+    keyToDecrypt = shiftKey(keyToDecrypt);
+    std::string cipherDetransposotioned = xorCipher(cipher, keyToDecrypt);
+    cipherDetransposotioned = inverseTransposition(keyToDecrypt, cipherDetransposotioned);
+    cipherDetransposotioned = inverseTransposition(keyToDecrypt, cipherDetransposotioned);
+    keyToDecrypt = inverseShiftKey(keyToDecrypt);
+    cipherDetransposotioned = inverseTransposition(keyToDecrypt, cipherDetransposotioned);
     std::string decyptedPlaintext = decryptCipher(keyToDecrypt, charToIndex, cipherDetransposotioned, characters);
 
     return 0;
