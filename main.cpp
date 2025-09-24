@@ -50,21 +50,28 @@ int generateRandom(int min, int max){
 }
 
 std::string createKey(std::string plainText, char characters[37]){
-    std::string plaintext;
     std::string temporaryKey;
 
-    for (int i=0; i <=plaintext.length()-1; i++){
+    int maxLength = std::min(16, (int)plainText.length());
+
+    for (int i=0; i <=maxLength; i++){
         int randomNumber = generateRandom(0, 46);
         temporaryKey.push_back(characters[randomNumber]);
     }
 
-    std::cout << "Key: " << temporaryKey << std::endl;
+    std::cout << "Generated key: " << temporaryKey << std::endl;
 
     return temporaryKey;
 }
 
 std::string createCipher(std::string temporaryKey, std::unordered_map<char,int> charToIndex,std::string plaintext,char characters[37]){
     std::string cipher;
+
+    while (temporaryKey.length() < plaintext.length()) {
+        temporaryKey += temporaryKey;
+    }
+    temporaryKey = temporaryKey.substr(0, plaintext.length());
+
     for (int i=0; i <=plaintext.length()-1; i++){
 
         int textVal = charToIndex[plaintext[i]];
@@ -86,6 +93,11 @@ std::string createCipher(std::string temporaryKey, std::unordered_map<char,int> 
 std::string transposition(std::string key, std::string cipher, int index){
     std::string transposedCipher;
     int keyLength = key.length();
+    while (keyLength >= cipher.length()) {
+        keyLength /= 2;
+        if (keyLength == 0) keyLength = 1; // seguridad para no romper loop
+    }
+
     if (index == 0){
         int rows = (cipher.length() + keyLength - 1) / keyLength; 
 
