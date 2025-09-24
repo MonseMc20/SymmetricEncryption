@@ -9,6 +9,40 @@
 #include <fstream> 
 #include <cctype>
 
+bool isValidAlphanumeric(const std::string &input) {
+    for (char c : input) {
+        if (!std::isalnum(static_cast<unsigned char>(c))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool validatePlaintext(const std::string &text) {
+    if (text.length() > 100) {
+        std::cerr << "Text exceeds 100 characters.\n";
+        return false;
+    }
+    if (!isValidAlphanumeric(text)) {
+        std::cerr << "Text must be alphanumeric only (A-Z, a-z, 0-9).\n";
+        return false;
+    }
+    return true;
+}
+
+bool validateKey(const std::string &key) {
+    if (key == "-") return true; 
+    if (key.length() < 4 || key.length() > 16) {
+        std::cerr << "The key must be between 4 and 16 characters.\n";
+        return false;
+    }
+    if (!isValidAlphanumeric(key)) {
+        std::cerr << "The key must be alphanumeric only.\n";
+        return false;
+    }
+    return true;
+}
+
 int generateRandom(int min, int max){
     
     int randomNumberInRange = min + (std::rand() % (max - min + 1)); 
@@ -191,10 +225,14 @@ int main (){
     std::cin >> plaintext;
     std::transform(plaintext.begin(), plaintext.end(), plaintext.begin(), ::toupper);
 
+    if (!validatePlaintext(plaintext)) return 1;
+
     std::cout << "Write the alphanumeric key for encryption (or '-' to auto-generate): ";
     std::cin >> key;
     std::transform(key.begin(), key.end(), key.begin(), ::toupper);
 
+    if (!validateKey(key)) return 1;
+    
     if (key == "-") {
         key = createKey(plaintext, characters);
     }
