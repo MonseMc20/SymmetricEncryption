@@ -77,6 +77,20 @@ std::string shiftKey(std::string key) {
     return newKey;
 }
 
+std::string xorCipher(const std::string &plaintext, const std::string &key) {
+    std::string cipher;
+    cipher.reserve(plaintext.size());
+
+    for (size_t i = 0; i < plaintext.size(); i++) {
+        char p = plaintext[i];
+        char k = key[i % key.size()]; 
+        char c = p ^ k;               
+        cipher.push_back(c);
+    }
+
+    return cipher;
+}
+
 std::string decryptCipher(std::string temporaryKey, std::unordered_map<char,int> charToIndex, std::string cipher, char characters[47]) {
     std::string plaintext;
 
@@ -159,6 +173,8 @@ int main (){
     std::cout << "shifted key: " << key << std::endl;
     cipher = createCipher(key, charToIndex, cipher, characters);
     cipher = transposition(key, cipher);
+    cipher = xorCipher(cipher, key);
+    std::cout << "Final Cipher: " << cipher << std::endl;
 
 
     std::string cipherToDecypt;
