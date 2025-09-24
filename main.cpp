@@ -203,6 +203,30 @@ std::string inverseShiftKey(std::string key) {
     return newKey;
 }
 
+void saveCipherToFile(const std::string &cipher, const std::string &filename = "cipher.txt") {
+    std::ofstream out(filename);
+    if (!out) {
+        std::cerr << "Error: Cannot open file\n";
+        return;
+    }
+    out << cipher;
+    out.close();
+    std::cout << "Cipher saved to file: " << filename << "\n";
+}
+
+std::string readCipherFromFile(const std::string &filename = "cipher.txt") {
+    std::ifstream in(filename);
+    if (!in) {
+        std::cerr << "Error: Cannot open file\n";
+        return "";
+    }
+    std::string cipher;
+    std::getline(in, cipher);
+    in.close();
+    std::cout << "Cipher loaded from file: " << cipher << "\n";
+    return cipher;
+}
+
 int main (){
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -232,7 +256,7 @@ int main (){
     std::transform(key.begin(), key.end(), key.begin(), ::toupper);
 
     if (!validateKey(key)) return 1;
-    
+
     if (key == "-") {
         key = createKey(plaintext, characters);
     }
@@ -244,15 +268,23 @@ int main (){
     cipher = transposition(key, cipher,0);
     cipher = xorCipher(cipher, key);
 
+    //saveCipherToFile(cipher);
+
+    //std::string loadedCipher = readCipherFromFile();
+
+    std::string loadedCipher = cipher;
+
     std::string keyToDecrypt;
 
-    std::cout << "ciphered text to be decrypted: " << cipher << "\n";
+    std::cout << "ciphered text to be decrypted: " << loadedCipher << "\n";
 
     std::cout << "Write the key to decrypt the chiper: ";
     std::cin >> keyToDecrypt;
 
+    if (!validateKey(keyToDecrypt)) return 1;
+
     keyToDecrypt = shiftKey(keyToDecrypt);
-    std::string cipherDetransposotioned = xorCipher(cipher, keyToDecrypt);
+    std::string cipherDetransposotioned = xorCipher(loadedCipher, keyToDecrypt);
     cipherDetransposotioned = inverseTransposition(keyToDecrypt, cipherDetransposotioned);
     cipherDetransposotioned = inverseTransposition(keyToDecrypt, cipherDetransposotioned);
     keyToDecrypt = inverseShiftKey(keyToDecrypt);
