@@ -47,27 +47,46 @@ std::string createCipher(std::string temporaryKey, std::unordered_map<char,int> 
     return cipher;
 }
 
-std::string transposition(std::string key, std::string cipher){
+std::string transposition(std::string key, std::string cipher, int index){
     std::string transposedCipher;
     int keyLength = key.length();
-    int rows = (cipher.length() + keyLength - 1) / keyLength; 
+    if (index == 0){
+        int rows = (cipher.length() + keyLength - 1) / keyLength; 
 
-    std::vector<std::vector<char>> cipherText(rows, std::vector<char>(keyLength, '_')); 
+        std::vector<std::vector<char>> cipherText(rows, std::vector<char>(keyLength, '_')); 
 
-    int idx = 0;
-    for (int c = 0; c < keyLength && idx < cipher.length(); c++){
-        for (int r = 0; r < rows && idx < cipher.length(); r++){
-            cipherText[r][c] = cipher[idx++];
+        int idx = 0;
+        for (int c = 0; c < keyLength && idx < cipher.length(); c++){
+            for (int r = 0; r < rows && idx < cipher.length(); r++){
+                cipherText[r][c] = cipher[idx++];
+            }
         }
-    }
 
-    for (int r = 0; r < rows; r++){
-        for (int c = 0; c < keyLength; c++){
-            transposedCipher.push_back(cipherText[r][c]);
+        for (int r = 0; r < rows; r++){
+            for (int c = 0; c < keyLength; c++){
+                transposedCipher.push_back(cipherText[r][c]);
+            }
         }
-    }
-    std::cout << "transposedCipher: " << transposedCipher << std::endl;
-    return transposedCipher;   
+        std::cout << "transposedCipher: " << transposedCipher << std::endl; 
+
+    } else if (index == 1){
+        int keyLength = key.length()/2;
+        int rows = (cipher.length() + keyLength - 1) / keyLength;
+        std::vector<std::vector<char>> cipherText(rows, std::vector<char>(keyLength, '_'));
+        int idx = 0;
+        for (int c = 0; c < keyLength && idx < cipher.length(); c++) {
+            for (int r = 0; r < rows && idx < cipher.length(); r++) {
+                cipherText[r][c] = cipher[idx++];
+            }
+        }
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < keyLength; c++) {
+                transposedCipher.push_back(cipherText[r][c]);
+            }
+        }
+        std::cout << "transposedCipher: " << transposedCipher << std::endl;
+    }  
+    return transposedCipher;
 }
 
 std::string shiftKey(std::string key) {
@@ -178,11 +197,11 @@ int main (){
         key = createKey(plaintext, characters);
     }
 
-    std::string cipher = createCipher(key, charToIndex, plaintext, characters);
-    cipher = transposition(key, cipher);
     key = shiftKey(key);
-    cipher = transposition(key, cipher);
-    cipher = transposition(key, cipher);
+    std::string cipher = createCipher(key, charToIndex, plaintext, characters);
+    cipher = transposition(key, cipher,0);
+    cipher = transposition(key, cipher,1);
+    cipher = transposition(key, cipher,0);
     cipher = xorCipher(cipher, key);
 
     std::string keyToDecrypt;
