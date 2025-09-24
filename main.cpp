@@ -6,6 +6,8 @@
 #include <string>
 #include <algorithm>    
 #include <vector>
+#include <fstream> 
+#include <cctype>
 
 int generateRandom(int min, int max){
     
