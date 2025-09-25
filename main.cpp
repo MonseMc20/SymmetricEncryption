@@ -178,41 +178,57 @@ int main(){
     std::unordered_map<char,int> charToIndex;
     for(int i=0;i<47;i++) charToIndex[characters[i]]=i;
 
+    std::ifstream infile("input.txt");
+    if(!infile){ std::cerr << "No se pudo abrir input.txt\n"; return 1; }
+
     std::string plaintext, key;
-    std::cout << "Write the alphanumeric text to be encrypted: ";
-    std::cin >> plaintext;
+    std::getline(infile, plaintext);
+    std::getline(infile, key);
+    infile.close();
+
     std::transform(plaintext.begin(), plaintext.end(), plaintext.begin(), ::toupper);
-
-    if(!validatePlaintext(plaintext)) return 1;
-
-    std::cout << "Write the alphanumeric key for encryption (or '-' to auto-generate): ";
-    std::cin >> key;
     std::transform(key.begin(), key.end(), key.begin(), ::toupper);
 
-    if(!validateKey(key)) return 1;
-
-    if(key=="-") key=createKey(plaintext,characters);
+    if(!validatePlaintext(plaintext) || !validateKey(key)) return 1;
 
     key = shiftKey(key);
+
     std::string cipher = createCipher(key,charToIndex,plaintext,characters);
     cipher = transposition(key,cipher,0);
     cipher = transposition(key,cipher,0);
     cipher = transposition(key,cipher,1);
     cipher = xorCipher(cipher,key);
 
-    std::string loadedCipher = cipher;
-    std::string keyToDecrypt;
-    std::cout << "ciphered text to be decrypted: " << loadedCipher << "\n";
-    std::cout << "Write the key to decrypt the chiper: ";
-    std::cin >> keyToDecrypt;
-    if(!validateKey(keyToDecrypt)) return 1;
+    std::ofstream outfile("cifrado.txt", std::ios::binary);
+    if(!outfile){ std::cerr << "No se pudo crear cifrado.txt\n"; return 1; }
+    outfile << cipher;
+    outfile.close();
 
-    keyToDecrypt = shiftKey(keyToDecrypt);
-    std::string detrans = xorCipher(loadedCipher,keyToDecrypt);
-    detrans = inverseTransposition(keyToDecrypt,detrans,1);
-    detrans = inverseTransposition(keyToDecrypt,detrans,0);
-    detrans = inverseTransposition(keyToDecrypt,detrans,0);
-    std::string decryptedPlaintext = decryptCipher(keyToDecrypt,charToIndex,detrans,characters);
+    std::ifstream keyfile("decryption_key.txt");
+    if(!keyfile){ std::cerr << "No se pudo abrir decryption_key.txt\n"; return 1; }
+    std::string decryptKey;
+    std::getline(keyfile, decryptKey);
+    keyfile.close();
+
+    std::ifstream cipherfile("cifrado.txt", std::ios::binary);
+    if(!cipherfile){ std::cerr << "No se pudo abrir cifrado.txt\n"; return 1; }
+    std::string loadedCipher((std::istreambuf_iterator<char>(cipherfile)), std::istreambuf_iterator<char>());
+    cipherfile.close();
+
+    decryptKey = shiftKey(decryptKey);
+
+    std::string detrans = xorCipher(loadedCipher, decryptKey);
+    detrans = inverseTransposition(decryptKey,detrans,1);
+    detrans = inverseTransposition(decryptKey,detrans,0);
+    detrans = inverseTransposition(decryptKey,detrans,0);
+    std::string decryptedPlaintext = decryptCipher(decryptKey,charToIndex,detrans,characters);
+
+    std::ofstream decfile("decryptedtext.txt");
+    if(!decfile){ std::cerr << "No se pudo crear decryptedtext.txt\n"; return 1; }
+    decfile << decryptedPlaintext;
+    decfile.close();
+
+    std::cout << "Cifrado y descifrado completados.\n";
 
     return 0;
 }
